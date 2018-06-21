@@ -1,5 +1,5 @@
 #encoding: utf-8
-from  flask  import  Flask,request,render_template
+from  flask  import  Flask,request,render_template,redirect
 import  user
 
 app=Flask(__name__)
@@ -19,13 +19,17 @@ def  login():
     username=params.get('username','')
     password=params.get('password','')
     if user.validate_login(username,password):
-        return "登录成功"
+        return  redirect('/users/')
     else:
         return render_template('login.html',username=username,error="username or password is error")
     print username
     print password
       
     return ''
+
+@app.route('/users/')
+def users():
+    return render_template('users.html',user_list=user.get_users())
 
 if __name__=='__main__':
     app.run(host='0.0.0.0',port=9001,debug=True)
