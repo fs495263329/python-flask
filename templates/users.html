@@ -5,7 +5,12 @@
         <title>用户列表</title>
     </head>
     <body>
+        {% for msg in  get_flashed_messages() %}
+            <span>{{msg}}</span>
+        {% endfor %} 
         <a href="/user/create/">添加用户</a>
+        欢迎 {{session.get('user','').get('username','')}}
+        <a href="/logout/">退出</a>
         <table border="1px">
             <thead>
                 <tr>
