@@ -4,9 +4,22 @@ import  user
 import  sys
 reload(sys)
 sys.setdefaultencoding('utf8')
+from  functools  import  wraps
+
 
 app=Flask(__name__)
 app.secret_key="dsfjksakjf"
+
+def  login_required(func):
+    @wraps(func)
+    def wrapper(*args,**kwargs):
+        if  session.get('user')  is None:
+            return redirect('/')
+        rt=func(*args,**kwargs)
+        return  rt
+    return wrapper
+
+
 
 @app.route('/',methods=['GET'])
 def  index():
@@ -33,19 +46,22 @@ def  login():
     return ''
 
 @app.route('/users/')
+@login_required
 def users():
-    print session
-    if session.get('user')  is  None:
-        return redirect('/')
+#    print session
+#    if session.get('user')  is  None:
+#        return redirect('/')
     return render_template('users.html',user_list=user.get_users(),msg=request.args.get('msg',''))
 #    return render_template('users.html',user_list=user.get_users())
 
 @app.route('/user/create/')                         #将url path=/user/create/的get请求交由create_user处理
+@login_required
 def create_user():
     return render_template('user_create.html')      #加载渲染user_create.html
 
 
 @app.route('/user/add/', methods=['POST'])          #将url path=/user/add的post请求交由add_user处理
+@login_required
 def add_user():
     username = request.form.get('username', '')
     password = request.form.get('password', '')
@@ -65,6 +81,7 @@ def add_user():
 
 
 @app.route('/user/modify/')                          #将url path=/user/modify/的歌特请求交由modify_user函数处理
+@login_required
 def modify_user():
     username = request.args.get('username', '')
     _user = user.get_user(username)
@@ -82,6 +99,7 @@ def modify_user():
     return render_template('user_modify.html', error=_error, password=_password, age=_age, username=_username)
 
 @app.route('/user/update/', methods=['POST'])           #将url path=/user/update/的post请求交由update_user函数处理
+@login_required
 def update_user():
     username = request.form.get('username', '')
     password = request.form.get('password', '')
@@ -97,6 +115,7 @@ def update_user():
         return render_template('user_modify.html', error=_error, username=username, password=password, age=age)
 
 @app.route('/user/delete/')
+@login_required
 def delete_user():
     username = request.args.get('username')
     user.delete_user(username)
@@ -104,6 +123,7 @@ def delete_user():
     return redirect('/users/')
 
 @app.route('/logout/')
+@login_required
 def logout():
     session.clear()
     print session
