@@ -1,6 +1,6 @@
 #encoding: utf-8
 from  flask  import  Flask,request,render_template,redirect,url_for,flash,session
-import  user
+import userdb as user
 import  sys
 reload(sys)
 sys.setdefaultencoding('utf8')
