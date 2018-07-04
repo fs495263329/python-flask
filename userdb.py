@@ -2,45 +2,22 @@
 import gconf
 import  json
 import MySQLdb
+from  dbutils import execute_fetch_sql
 
 def get_users():
+    _columns=('id','username','password','age')
     _sql='select *  from user'
-    _conn=None
-    _cur=None
-    _count=0
     _rt=[]
-    try:
-        _conn=MySQLdb.connect(host=gconf.MYSQL_HOST,port=gconf.MYSQL_PORT,user=gconf.MYSQL_USER,passwd=gconf.MYSQL_PASSWD,db=gconf.MYSQL_DB,charset=gconf.MYSQL_CHARSET)
-        _cur=_conn.cursor()
-        _count=_cur.execute(_sql)
-        _rt_list=_cur.fetchall()
-        for _line in  _rt_list:
-            _rt.append(dict(zip(('id','username','password','age'),_line)))
-    except BaseException as e:
-        print e
-    finally:
-        if _cur:
-            _cur.close()
-            _conn.close()
+    _count,_rt_list=execute_fetch_sql(_sql)
+    for _line in _rt_list:
+        _rt.append(dict(zip(_columns,_line)))
     return _rt
 
 
 def validate_login(username,password):
     _sql='select *  from user where username=%s and  password=md5(%s)'
-    _conn=None
-    _cur=None
-    _count=0
-    try:
-        _conn=MySQLdb.connect(host=gconf.MYSQL_HOST,port=gconf.MYSQL_PORT,user=gconf.MYSQL_USER,passwd=gconf.MYSQL_PASSWD,db=gconf.MYSQL_DB,charset=gconf.MYSQL_CHARSET)
-        _cur=_conn.cursor()
-        _count=_cur.execute(_sql,(username,password))
-    except BaseException as e:
-        print e
-    finally:
-        if _cur:
-            _cur.close()
-            _conn.close()
-    return _count != 0
+    _count,_rt_list=execute_fetch_sql(_sql,(username,password))
+    return _count
 
 def validate_add_user(username, password, age):
     if username.strip() == '':
@@ -63,7 +40,8 @@ def validate_add_user(username, password, age):
 
 
 def add_user(username, password, age):
-    _user = {'username' : username, 'password' : password, 'age' : age}
+    _sql = 'insert  into user(username,password,age) values(%s,%s,%s)'
+    _args=(userbane,password,age)
     _users = get_users()
     _users.append(_user)
     save_users(_users)
