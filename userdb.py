@@ -2,7 +2,7 @@
 import gconf
 import  json
 import MySQLdb
-from  dbutils import execute_fetch_sql
+from  dbutils import execute_fetch_sql,execute_commit_sql
 
 def get_users():
     _columns=('id','username','password','age')
@@ -40,11 +40,9 @@ def validate_add_user(username, password, age):
 
 
 def add_user(username, password, age):
-    _sql = 'insert  into user(username,password,age) values(%s,%s,%s)'
-    _args=(userbane,password,age)
-    _users = get_users()
-    _users.append(_user)
-    save_users(_users)
+    _sql = 'insert  into user(username,password,age) values(%s,md5(%s),%s)'
+    _args=(username,password,age)
+    execute_commit_sql(_sql,_args)
 
 def save_users(users):
     fhandler = open(gconf.USER_FILE, 'wb')
